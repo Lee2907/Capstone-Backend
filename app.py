@@ -758,7 +758,7 @@ def checkin_out():
         with sqlite3.connect("products.db") as conn:
             cursor = conn.cursor()
             cursor.row_factory = sqlite3.Row
-            cursor.execute("SELECT * FROM shipping_address")
+            cursor.execute("SELECT * FROM recipient_address")
             posts = cursor.fetchall()
             accumulator = []
 
