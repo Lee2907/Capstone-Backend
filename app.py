@@ -779,17 +779,19 @@ def contact():
     if request.method == "POST":
         try:
 
-            name = request.json['name']
-            email_address = request.json['email_address']
-            enquiry = request.json['enquiry']
+            name = request.form['name']
+            contact = request.form['contact_no']
+            email_address = request.form['email_address']
+            enquiry = request.form['enquiry']
 
             with sqlite3.connect("products.db") as conn:
                 cursor = conn.cursor()
                 cursor.execute('''INSERT INTO contact(
                                name,
+                               contact_no,
                                email_address,
                                enquiry) VALUES(?, ?, ?)''',
-                               (name, email_address, enquiry))
+                               (name, contact, email_address, enquiry))
                 conn.commit()
                 response["message"] = "Enquiry registered successfully "
                 response["status_code"] = 201
