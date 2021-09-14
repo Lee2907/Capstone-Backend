@@ -97,24 +97,6 @@ def checkout_table():
     conn.close()
 
 
-def returns_table():
-    conn = sqlite3.connect('products.db')
-    print("Opened database successfully")
-
-    conn.execute('''CREATE TABLE IF NOT EXISTS returns(return_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                 order_date TEXT NOT NULL,
-                 address_delivered TEXT NOT NULL,
-                 order_number INTEGER,
-                 product_name TEXT NOT NULL,
-                 product_code TEXT NOT NULL,
-                 reason_for_return TEXT NOT NULL,
-                 product_condition TEXT NOT NULL,
-                 other_details TEXT NOT NULL,
-                 FOREIGN KEY (order_number) REFERENCES users(user_id))''')
-    print("returns table created successfully")
-    conn.close()
-
-
 def contact_us():
     conn = sqlite3.connect('products.db')
     print("Opened database successfully")
@@ -132,7 +114,6 @@ user_reg()
 products()
 checkout_table()
 recipient()
-returns_table()
 contact_us()
 
 
@@ -638,82 +619,6 @@ def delete_order(order_id):
         response['status_code'] = 200
         response['message'] = "Order deleted successfully."
     return response
-
-
-# get and fetch all returns
-@app.route('/returns/', methods=["GET", "POST"])
-@cross_origin()
-# @jwt_required()
-def returns_info():
-    response = {}
-    now = datetime.now()
-    if request.method == "POST":
-        try:
-
-            address_delivered = request.form['address_delivered']
-            order_number = request.form['order_number']
-            product_name = request.form['product_name']
-            product_code = request.form['product_code']
-            reason_for_return = request.form['reason_for_return']
-            product_condition = request.form['product_condition']
-            other_details = request.form['other_details']
-
-            with sqlite3.connect("products.db") as conn:
-                cursor = conn.cursor()
-                cursor.execute('''INSERT INTO returns(
-                               order_date,
-                               address_delivered,
-                               order_number,
-                               product_name,
-                               product_code,
-                               reason_for_return,
-                               product_condition,
-                               other_details) VALUES(?, ?, ?, ?, ?, ?, ?, ?)''',
-                               (now, address_delivered, order_number, product_name, product_code,
-                                reason_for_return, product_condition, other_details))
-                conn.commit()
-                response["message"] = "The return has been received successfully."
-                response["status_code"] = 201
-
-                return response
-        except Exception:
-            response["message"] = "Enter full address"
-            response["status_code"] = 401
-            return response
-    if request.method == "GET":
-
-        with sqlite3.connect("products.db") as conn:
-            cursor = conn.cursor()
-            cursor.row_factory = sqlite3.Row
-            cursor.execute("SELECT * FROM returns")
-            posts = cursor.fetchall()
-            accumulator = []
-
-            for i in posts:
-                accumulator.append({k: i[k] for k in i.keys()})
-
-        response['status_code'] = 200
-        response['data'] = tuple(accumulator)
-        return jsonify(response)
-
-
-# get returns by id
-@app.route('/get-returns/<int:order_number>', methods=["GET"])
-@cross_origin()
-# @jwt_required()
-def returns(order_number):
-    response = {}
-    with sqlite3.connect("products.db") as conn:
-        cursor = conn.cursor()
-        cursor.row_factory = sqlite3.Row
-        cursor.execute("SELECT * FROM returns WHERE order_number=" + str(order_number))
-        user = cursor.fetchone()
-        accumulator = []
-        for i in user:
-            accumulator.append({k: i[k] for k in i.keys()})
-    response['status_code'] = 200
-    response['data'] = tuple(accumulator)
-    return jsonify(response)
 
 
 # the checkout
